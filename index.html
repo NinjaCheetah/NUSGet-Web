@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link type="text/css" rel="stylesheet" href="/assets/css/style.css">
+    <script src="/bower_components/file-saver/dist/FileSaver.min.js"></script>
+    <script src="/scripts/app.js" type="module"></script>
+    <title>NUSGet Web</title>
+</head>
+<body style="width: 100%; height: 100%" class="container">
+    <div style="justify-content: center; display: flex; align-items: center;" class="mt-5 mb-5">
+        <img alt="An icon featuring a downward facing arrow with the text &quot;NUSG&quot; across the bottom." src="/assets/NUSGet-Web.png" style="max-height: 192px; max-width: 192px;"/>
+        <h1 style="font-weight: bold">NUSGet Web Alpha</h1>
+    </div>
+    <div>
+        <label for="tid-entry">Title ID</label>
+        <input type="text" id="tid-entry" name="tid-entry">
+        <label for="ver-entry">Version</label>
+        <input type="number" id="ver-entry" name="ver-entry">
+        <label for="consoles">Console</label>
+        <select id="consoles" name="consoles">
+          <option value="wii">Wii</option>
+          <option value="vwii">vWii</option>
+          <option value="dsi">DSi</option>
+        </select>
+        <br>
+        <button id="downloadBtn">Download</button>
+    </div>
+</body>
+</html>

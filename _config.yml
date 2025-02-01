@@ -1,0 +1,10 @@
+name: NUSGet Web
+title: NUSGet Web
+url: https://nusget.ninjacheetah.dev
+plugins:
+  - jekyll-sitemap
+  - jekyll-seo-tag
+sass:
+  load_paths:
+    - assets/css
+    - assets/bootstrap/css
