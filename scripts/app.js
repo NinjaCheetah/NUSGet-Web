@@ -20,8 +20,8 @@ async function downloadTest() {
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
 
-    let api_url = "http://localhost:5000/download"
-    //let api_url = "https://api.nusget.ninjacheetah.dev/download"
+    //let api_url = "http://localhost:5000/download"
+    let api_url = "https://api.nusget.ninjacheetah.dev/download"
 
     status_text.innerHTML = "Downloading title... please wait.";
     if (tgtConsole === "dsi") {
