@@ -12,7 +12,36 @@
         <h1 style="font-weight: bold">NUSGet Web Alpha</h1>
     </div>
     <div>
-        <label for="tid-entry">Title ID</label>
+        <div class="row mb-3">
+            <div class="col-auto">
+                <label for="tid-entry" class="col-form-label">Title ID</label>
+                <input type="text" class="form-control" id="tid-entry" aria-describedby="tid-help">
+                <div id="tid-help" class="form-text">Title IDs must be formatted as 8 hex bytes, not 4 ASCII characters.</div>
+            </div>
+            <div class="col-auto">
+                <label for="ver-entry" class="col-form-label">Version</label>
+                <input type="number" class="form-control" id="ver-entry" aria-describedby="ver-help">
+                <div id="ver-help" class="form-text">You can leave this box blank to download the latest version of a Title.</div>
+            </div>
+            <div class="col-auto">
+                <label for="consoles" class="col-form-label">Console</label>
+                <select id="consoles" class="form-select">
+                    <option value="wii" selected>Wii</option>
+                    <option value="vwii">vWii</option>
+                    <option value="dsi">DSi</option>
+                </select>
+            </div>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <button id="download-btn" class="btn btn-primary">Download</button>
+            </div>
+            <div class="col-auto">
+                <span id="status-text"></span>
+            </div>
+        </div>
+
+        <!--label for="tid-entry">Title ID</label>
         <input type="text" id="tid-entry" name="tid-entry">
         <label for="ver-entry">Version</label>
         <input type="number" id="ver-entry" name="ver-entry">
@@ -24,7 +53,7 @@
         </select>
         <br>
         <button id="downloadBtn">Download</button>
-        <p id="status-text"></p>
+        <p id="status-text"></p-->
     </div>
 </body>
 </html>

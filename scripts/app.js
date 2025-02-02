@@ -1,4 +1,4 @@
-document.getElementById("downloadBtn").onclick = downloadTest;
+document.getElementById("download-btn").onclick = downloadTest;
 
 async function downloadTest() {
     let status_text = document.getElementById("status-text");
@@ -20,8 +20,8 @@ async function downloadTest() {
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
 
-    //let api_url = "http://localhost:5000/download"
-    let api_url = "https://api.nusget.ninjacheetah.dev/download"
+    let api_url = "http://localhost:5000/download"
+    //let api_url = "https://api.nusget.ninjacheetah.dev/download"
 
     status_text.innerHTML = "Downloading title... please wait.";
     if (tgtConsole === "dsi") {
@@ -31,6 +31,7 @@ async function downloadTest() {
         api_url += "/wad"
     }
 
+    let fileName = "";
     try {
         const response = await fetch(api_url + `/${tid}/${ver}`);
         if (!response.ok) {
@@ -38,7 +39,7 @@ async function downloadTest() {
             try {
                 let response_details = await response.json();
                 console.error(response_details);
-                status_text.innerHTML = `An error occurred. API returned: "${response_details["Error"]}"`;
+                status_text.innerHTML = `An error occurred. API returned "${response_details["Error"]}"`;
             } catch (e) {
                 console.error("No further details could be provided.")
                 status_text.innerHTML = "An unknown error occurred."
@@ -50,7 +51,9 @@ async function downloadTest() {
         const url = window.URL.createObjectURL(api_response);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`;
+        fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
+        console.log(`Saving file as "${fileName}"`);
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -59,4 +62,6 @@ async function downloadTest() {
         console.error(e);
         status_text.innerHTML = "An unknown error occurred. The API may be unavailable."
     }
+
+    status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
 }
