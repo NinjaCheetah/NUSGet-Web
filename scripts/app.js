@@ -20,7 +20,8 @@ async function downloadTest() {
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
 
-    let api_url = "http://localhost:5000"
+    //let api_url = "http://localhost:5000"
+    let api_url = "https://api.nusget.ninjacheetah.dev"
 
     status_text.innerHTML = "Downloading title... please wait.";
 
