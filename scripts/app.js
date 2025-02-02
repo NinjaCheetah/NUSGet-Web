@@ -1,6 +1,8 @@
 document.getElementById("downloadBtn").onclick = downloadTest;
 
 async function downloadTest() {
+    let status_text = document.getElementById("status-text");
+
     let tid = document.getElementById("tid-entry").value;
     console.log(`Target TID: ${tid}`);
     if (tid === "") {
@@ -8,7 +10,7 @@ async function downloadTest() {
         return;
     }
 
-    var ver = document.getElementById("ver-entry").value;
+    let ver = document.getElementById("ver-entry").value;
     console.log(`Target Version: ${ver}`);
     if (ver === "") {
         console.log("No version was specified! Using -1 to signal latest.");
@@ -18,26 +20,26 @@ async function downloadTest() {
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
 
-    let url = `http://ccs.cdn.wup.shop.nintendo.net/ccs/download/${tid}/${(ver === -1) ? "tmd":`tmd.${ver}`}`
-    console.log(url);
+    let api_url = "http://localhost:5000"
 
-    const proxyUrl = "https://cors-anywhere.herokuapp.com/";
+    status_text.innerHTML = "Downloading title... please wait.";
 
-    var myBlob;
     try {
-        const response = await fetch(url);
+        const response = await fetch(api_url + `/download/wad/${tid}/${ver}`);
         if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
+            console.error(`Response status: ${response.status}`);
         }
-        myBlob = await response.blob();
-      } catch (e) {
+        const metadata = JSON.parse(response.headers.get("X-Metadata"));
+        let api_response = await response.blob();
+        const url = window.URL.createObjectURL(api_response);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${metadata["tid"]}-v${metadata["version"]}.wad`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    } catch (e) {
         console.error(e);
-      }
-
-    saveAs(myBlob, "tmd");
-
-    // let link = document.createElement("a");
-    // link.download = name;
-    // link.href = downloadUrl;
-    // link.click();
+    }
 }
