@@ -1,39 +1,82 @@
-document.getElementById("download-btn").onclick = downloadTest;
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("download-btn").onclick = startDownload;
+});
 
-async function downloadTest() {
-    let status_text = document.getElementById("status-text");
+//let api_url = "http://localhost:5000/download"
+let api_url = "https://api.nusget.ninjacheetah.dev/download"
 
+let status_text = document.getElementById("status-text");
+
+async function startDownload() {
+    let selectedFormat = document.querySelector('input[name=format]:checked').value;
     let tid = document.getElementById("tid-entry").value;
     console.log(`Target TID: ${tid}`);
-    if (tid === "") {
-        console.log("No TID was specified! Aborting.");
+    if (tid.length !== 16) {
+        console.log("No valid TID entered! Aborting.");
+        status_text.innerHTML = "Please enter a valid Title ID.";
         return;
     }
-
     let ver = document.getElementById("ver-entry").value;
     console.log(`Target Version: ${ver}`);
     if (ver === "") {
         console.log("No version was specified! Using -1 to signal latest.");
         ver = -1;
     }
-
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
-
-    //let api_url = "http://localhost:5000/download"
-    let api_url = "https://api.nusget.ninjacheetah.dev/download"
-
     status_text.innerHTML = "Downloading title... please wait.";
-    if (tgtConsole === "dsi") {
-        api_url += "/tad"
+    switch(selectedFormat) {
+        case 'wad':
+            await downloadWAD(tid, ver, tgtConsole);
+            break;
+        case 'enc':
+            await downloadEncrypted(tid, ver);
+            break;
+        case 'dec':
+            await downloadDecrypted(tid, ver);
+            break;
     }
-    else {
-        api_url += "/wad"
-    }
+}
 
-    let fileName = "";
+async function downloadWAD(tid, ver, tgtConsole) {
+    const targetUrl = `${api_url}/${(tgtConsole === "dsi" ? "tad" : "wad")}/${tid}/${ver}`
     try {
-        const response = await fetch(api_url + `/${tid}/${ver}`);
+        const [metadata, apiResponse] = await makeRequest(targetUrl);
+        const fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
+        await downloadFile(apiResponse, fileName);
+        status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
+    } catch (e) {
+        console.error("An error occurred during the download. Details are likely above.");
+    }
+}
+
+async function downloadEncrypted(tid, ver) {
+    const targetUrl = `${api_url}/enc/${tid}/${ver}`
+    try {
+        const [metadata, apiResponse] = await makeRequest(targetUrl);
+        const fileName = `${metadata["tid"]}-v${metadata["version"]}-Encrypted.zip`
+        await downloadFile(apiResponse, fileName);
+        status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
+    } catch (e) {
+        console.error("An error occurred during the download. Details are likely above.");
+    }
+}
+
+async function downloadDecrypted(tid, ver) {
+    const targetUrl = `${api_url}/dec/${tid}/${ver}`
+    try {
+        const [metadata, apiResponse] = await makeRequest(targetUrl);
+        const fileName = `${metadata["tid"]}-v${metadata["version"]}-Decrypted.zip`
+        await downloadFile(apiResponse, fileName);
+        status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
+    } catch (e) {
+        console.error("An error occurred during the download. Details are likely above.");
+    }
+}
+
+async function makeRequest(api_url) {
+    try {
+        const response = await fetch(api_url);
         if (!response.ok) {
             console.error(`Response status: ${response.status}`);
             try {
@@ -48,20 +91,22 @@ async function downloadTest() {
         }
         const metadata = JSON.parse(response.headers.get("X-Metadata"));
         let api_response = await response.blob();
-        const url = window.URL.createObjectURL(api_response);
-        const a = document.createElement("a");
-        a.href = url;
-        fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
-        console.log(`Saving file as "${fileName}"`);
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
+        return [metadata, api_response];
     } catch (e) {
         console.error(e);
         status_text.innerHTML = "An unknown error occurred. The API may be unavailable."
+        throw Error("Download could not be completed.")
     }
+}
 
-    status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
+async function downloadFile(fileBlob, fileName) {
+    const url = window.URL.createObjectURL(fileBlob);
+    const a = document.createElement("a");
+    a.href = url;
+    console.log(`Saving file as "${fileName}"`);
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
 }
