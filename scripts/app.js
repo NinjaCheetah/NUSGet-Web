@@ -2,8 +2,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("download-btn").onclick = startDownload;
 });
 
-//let api_url = "http://localhost:5000/download"
-let api_url = "https://api.nusget.ninjacheetah.dev/download"
+//let api_url = "http://localhost:8000"
+let api_url = "https://api.nusget.ninjacheetah.dev"
 
 let status_text = document.getElementById("status-text");
 
@@ -39,7 +39,7 @@ async function startDownload() {
 }
 
 async function downloadWAD(tid, ver, tgtConsole) {
-    const targetUrl = `${api_url}/${(tgtConsole === "dsi" ? "tad" : "wad")}/${tid}/${ver}`
+    const targetUrl = `${api_url}/v1/titles/${tid}/versions/${ver}/download/${(tgtConsole === "dsi" ? "tad" : "wad")}`
     try {
         const [metadata, apiResponse] = await makeRequest(targetUrl);
         const fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
@@ -51,7 +51,7 @@ async function downloadWAD(tid, ver, tgtConsole) {
 }
 
 async function downloadEncrypted(tid, ver) {
-    const targetUrl = `${api_url}/enc/${tid}/${ver}`
+    const targetUrl = `${api_url}/v1/titles/${tid}/versions/${ver}/download/enc`
     try {
         const [metadata, apiResponse] = await makeRequest(targetUrl);
         const fileName = `${metadata["tid"]}-v${metadata["version"]}-Encrypted.zip`
@@ -63,7 +63,7 @@ async function downloadEncrypted(tid, ver) {
 }
 
 async function downloadDecrypted(tid, ver) {
-    const targetUrl = `${api_url}/dec/${tid}/${ver}`
+    const targetUrl = `${api_url}/v1/titles/${tid}/versions/${ver}/download/dec`
     try {
         const [metadata, apiResponse] = await makeRequest(targetUrl);
         const fileName = `${metadata["tid"]}-v${metadata["version"]}-Decrypted.zip`
@@ -82,7 +82,17 @@ async function makeRequest(api_url) {
             try {
                 let response_details = await response.json();
                 console.error(response_details);
-                status_text.innerHTML = `An error occurred. API returned "${response_details["Error"]}"`;
+                switch (response_details.code) {
+                    case "title.notfound":
+                        status_text.innerHTML = `The Title or version you're trying to download cannot be found.`;
+                        break;
+                    case "title.notik":
+                        status_text.innerHTML = `The Title you're trying to download does not have a Ticket. You cannot download a WAD or decrypted contents.`;
+                        break;
+                    default:
+                        status_text.innerHTML = `An error occurred. API returned "${response_details.message}"`;
+                        break;
+                }
             } catch (e) {
                 console.error("No further details could be provided.")
                 status_text.innerHTML = "An unknown error occurred."
