@@ -1,7 +1,6 @@
+// Main app logic for NUSGet Web, handling argument parsing and downloading.
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("download-btn").onclick = startDownload;
-    const radios = document.querySelectorAll('input[type=radio][name=format]');
-    radios.forEach(radio => radio.addEventListener('change', () => toggleWADNameEntry(radio.value)));
 });
 
 //let api_url = "http://localhost:8000"
@@ -11,6 +10,7 @@ let status_text = document.getElementById("status-text");
 
 async function startDownload() {
     let selectedFormat = document.querySelector('input[name=format]:checked').value;
+    let wadName = document.getElementById("wad-name-entry").value;
     let tid = document.getElementById("tid-entry").value;
     console.log(`Target TID: ${tid}`);
     if (tid.length !== 16) {
@@ -27,6 +27,29 @@ async function startDownload() {
     let tgtConsole = document.getElementById("consoles").value;
     console.log(`Target Console: ${tgtConsole}`);
     status_text.innerHTML = "Downloading title... please wait.";
+    // Construct a URL with parameters and set that, so someone could copy it and share it.
+    const usedParams = new URLSearchParams();
+    usedParams.append("tid", tid);
+    if (ver !== -1 && ver !== "-1" && ver !== "latest") {
+        usedParams.append("ver", ver);
+    }
+    if (tgtConsole !== "wii") {
+        usedParams.append("console", tgtConsole);
+    }
+    if (selectedFormat !== "wad") {
+        usedParams.append("format", selectedFormat);
+    }
+    // Don't save the WAD name if this isn't a WAD.
+    if (wadName !== "" && selectedFormat === "wad") {
+        usedParams.append("wadname", wadName);
+    }
+    let url = new URL(window.location.href)
+    url.search = usedParams.toString();
+    history.pushState({}, '', url.href)
+    //window.location.search = usedParams.toString();
+    console.log(window.location.href);
+    console.log(usedParams.toString());
+    // Trigger the appropriate download function.
     switch(selectedFormat) {
         case 'wad':
             await downloadWAD(tid, ver, tgtConsole);
@@ -136,9 +159,4 @@ async function downloadFile(fileBlob, fileName) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
-}
-
-async function toggleWADNameEntry(selectedFormat) {
-    let wadNameEntry = document.getElementById("wad-name-entry");
-    wadNameEntry.disabled = selectedFormat !== "wad";
 }
