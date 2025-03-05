@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("download-btn").onclick = startDownload;
+    const radios = document.querySelectorAll('input[type=radio][name=format]');
+    radios.forEach(radio => radio.addEventListener('change', () => toggleWADNameEntry(radio.value)));
 });
 
 //let api_url = "http://localhost:8000"
@@ -42,7 +44,22 @@ async function downloadWAD(tid, ver, tgtConsole) {
     const targetUrl = `${api_url}/v1/titles/${tid}/versions/${ver}/download/${(tgtConsole === "dsi" ? "tad" : "wad")}`
     try {
         const [metadata, apiResponse] = await makeRequest(targetUrl);
-        const fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
+        // Parse the WAD name entry to see if a custom name was set.
+        let wadNameEntry = document.getElementById("wad-name-entry").value;
+        let fileName = `${metadata["tid"]}-v${metadata["version"]}.${(tgtConsole === "dsi" ? "tad" : "wad")}`
+        if (wadNameEntry !== "") {
+            if (tgtConsole === "dsi") {
+                if (wadNameEntry.slice(-4) !== ".tad") {
+                    wadNameEntry += ".tad";
+                }
+            }
+            else {
+                if (wadNameEntry.slice(-4) !== ".wad") {
+                    wadNameEntry += ".wad";
+                }
+            }
+            fileName = wadNameEntry;
+        }
         await downloadFile(apiResponse, fileName);
         status_text.innerHTML = `Download complete! File has been saved as "${fileName}."`;
     } catch (e) {
@@ -119,4 +136,9 @@ async function downloadFile(fileBlob, fileName) {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+}
+
+async function toggleWADNameEntry(selectedFormat) {
+    let wadNameEntry = document.getElementById("wad-name-entry");
+    wadNameEntry.disabled = selectedFormat !== "wad";
 }
